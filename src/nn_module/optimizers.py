@@ -16,9 +16,9 @@ class SGD(object):
 	# train for a number of epochs
 	def train(self, train_input, train_target, nb_epochs, stepsize):
 		# get information
-		n_samples = train_input.size(1)
-		in_dim = train_input.size(0)
-		out_dim = train_target.size(0)
+		n_samples = train_input.size(0)
+		in_dim = train_input.size(1)
+		out_dim = train_target.size(1)
 		
 		# iterate over epochs
 		for e in range(nb_epochs):
@@ -28,8 +28,8 @@ class SGD(object):
 			sample_ordering = np.random.permutation([i for i in range(n_samples)])
 			# perform sgd
 			for s in sample_ordering:
-				x = train_input[:, s].view(in_dim, 1)
-				t = train_target[:, s].view(out_dim, 1)
+				x = train_input[s, :].view(1, in_dim)
+				t = train_target[s, :].view(1, out_dim)
 				self.model.zerograd()
 				out = self.model.forward(x)
 				loss = self.lossf.loss(out, t)
