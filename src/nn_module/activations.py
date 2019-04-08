@@ -19,11 +19,15 @@ class tanh(module.Module):
 	
 # relu activation function
 class relu(module.Module):
+	def __init__(self):
+		super(relu, self).__init__()
+		self.inputmemory = 0
 	# forward pass
 	def forward(self, input):
+		self.inputmemory = input
 		return input*(input>0).float()
 	
 	# backward pass
 	def backward(self, gradwrtoutput):
-		return (gradwrtoutput>0).float()
+		return (self.inputmemory>0).float() * gradwrtoutput
 		

@@ -24,6 +24,7 @@ class SGD(object):
 		for e in range(nb_epochs):
 			# print current epoch
 			print('Epoch {}...'.format(e))
+			print(self.lossf.loss(self.model.forward(train_input), train_target))
 			# generate random sample order
 			sample_ordering = np.random.permutation([i for i in range(n_samples)])
 			# perform sgd
