@@ -14,17 +14,21 @@ class SGD(object):
         self.lossf = lossf
         
     # train for a number of epochs
-    def train(self, train_input, train_target, nb_epochs, stepsize):
+    def train(self, train_input, train_target, nb_epochs, stepsize, verbose = False):
         # get information
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         
+        losspath = []
+        
         # iterate over epochs
         for e in range(nb_epochs):
-            # print current epoch
-            print('Epoch {}...'.format(e))
-            print(self.lossf.loss(self.model.forward(train_input), train_target))
+            # print current epoch loss and store it in losspath
+            if verbose:
+                print('Epoch {}...'.format(e))
+                print(self.lossf.loss(self.model.forward(train_input), train_target))
+            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # perform sgd
@@ -37,3 +41,4 @@ class SGD(object):
                 dloss = self.lossf.dloss(out, t)
                 self.model.backward(dloss)
                 self.model.gradient_step(stepsize)
+        return losspath
