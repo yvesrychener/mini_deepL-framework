@@ -40,5 +40,10 @@ class SGD(object):
                 loss = self.lossf.loss(out, t)
                 dloss = self.lossf.dloss(out, t)
                 self.model.backward(dloss)
-                self.model.gradient_step(stepsize)
+                grads = self.model.gradient()
+                for i,g in enumerate(grads):
+                    if not g==None:
+                        grads[i][0] *= - stepsize   # bias 
+                        grads[i][1] *= - stepsize   # weights                
+                self.model.gradient_step(grads)
         return losspath

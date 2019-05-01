@@ -45,7 +45,16 @@ class sequential(module.Module):
         return
 
     # take gradient step
-    def gradient_step(self, stepsize):
-        for l in self.layers:
-            l.gradient_step(stepsize)
+    def gradient_step(self, directions):
+        for i, l in enumerate(self.layers):
+            l.gradient_step(directions[i])
         return
+    
+    # return the current gradient
+    def gradient(self):
+        gradients = []
+        for l in self.layers:
+            gradients.append(l.gradient())
+        return gradients
+        
+        

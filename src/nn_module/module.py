@@ -23,5 +23,9 @@ class Module(object):
         return
 
     # take gradient step
-    def gradient_step(self, stepsize):
+    def gradient_step(self, directions):
         return 
+    
+    # return the current gradient
+    def gradient(self):
+        return

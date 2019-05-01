@@ -47,8 +47,12 @@ class fully_connected(module.Module):
         self.dweights.zero_()
         return
 
-    # take gradient step with desired stepsize
-    def gradient_step(self, stepsize):
-        self.bias -= stepsize * self.dbias
-        self.weights -= stepsize * self.dweights
+    # take step in desired direction (directions is a list [d_bias, d_weights])
+    def gradient_step(self, directions):
+        self.bias += directions[0]
+        self.weights += directions[1]
         return
+        
+    # return the current gradient
+    def gradient(self):
+        return [self.dbias, self.dweights]
