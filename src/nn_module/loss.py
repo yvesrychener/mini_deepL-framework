@@ -25,10 +25,7 @@ class CE(object):
 
     # derivative of the loss with respect to network output
     def dloss(self, output, target):
-        var = -(
-            torch.exp(output - output[:, target.argmax(dim=1)]).sum()
-            * torch.exp(output - output[:, target.argmax(dim=1)])
-        )
-        var[:, target.argmax(dim=1)] = 0
+        var = output.exp() / output.exp().sum(dim=1)
+        var[:, target.argmax(dim=1)] -= 1
         return var
 
