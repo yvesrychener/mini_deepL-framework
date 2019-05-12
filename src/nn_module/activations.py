@@ -5,6 +5,7 @@
 
 from . import module
 import torch
+torch.set_grad_enabled(False)
 
 # tanh activation function
 class tanh(module.Module):
@@ -18,7 +19,7 @@ class tanh(module.Module):
 
     # backward pass
     def backward(self, gradwrtoutput):
-        return 4 * (x.exp() + x.mul(-1).exp()).pow(-2) * gradwrtoutput
+        return 4 * (self.inputmemory.exp() + self.inputmemory.mul(-1).exp()).pow(-2) * gradwrtoutput
 
 
 # relu activation function

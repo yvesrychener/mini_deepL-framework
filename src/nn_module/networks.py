@@ -4,6 +4,7 @@
 # +-----------------------------------------------------------------------+
 from . import module
 import torch
+torch.set_grad_enabled(False)
 
 class sequential(module.Module):
     # initialize

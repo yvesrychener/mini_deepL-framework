@@ -3,6 +3,9 @@
 # | This module implements the basic module class                         |
 # +-----------------------------------------------------------------------+
 
+import torch
+torch.set_grad_enabled(False)
+
 # basic module
 class Module(object):
 

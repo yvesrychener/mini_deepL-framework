@@ -4,6 +4,7 @@
 # +-----------------------------------------------------------------------+
 
 import torch
+torch.set_grad_enabled(False)
 
 # MSE loss function
 class MSE(object):

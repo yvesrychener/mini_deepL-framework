@@ -6,6 +6,7 @@
 from . import module
 from math import sqrt
 import torch
+torch.set_grad_enabled(False)
 
 
 # fully connected layer
