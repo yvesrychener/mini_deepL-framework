@@ -58,4 +58,7 @@ class sequential(module.Module):
             gradients.append(l.gradient())
         return gradients
         
-        
+    def set_training_mode(self, mode):
+        print('Switching training mode to {} for all layers...'.format(mode))
+        for l in self.layers:
+            l.set_training_mode(mode)

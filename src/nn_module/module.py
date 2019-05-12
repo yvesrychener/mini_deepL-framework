@@ -9,6 +9,10 @@ torch.set_grad_enabled(False)
 # basic module
 class Module(object):
 
+    # constructor
+    def __init__(self):
+        self.training_mode = True # e.g. dropout layers will be active
+
     # forward pass
     def forward(self, *input):
         raise NotImplementedError
@@ -32,3 +36,8 @@ class Module(object):
     # return the current gradient
     def gradient(self):
         return
+
+    # Set training mode on or off
+    def set_training_mode(self, arg):
+        self.training_mode = arg
+
