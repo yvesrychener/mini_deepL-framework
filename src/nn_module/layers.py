@@ -85,15 +85,3 @@ class dropout(module.Module):
     def param(self):
         return {'dropout': self.d}
 
-    # empty method (provided for compatibility but has no effect on dropout layer)
-    def zerograd(self):
-        return None
-
-    # empty method (provided for compatibility but has no effect on dropout layer)
-    def gradient_step(self, *args):
-        return None
-
-    # empty method (provided for compatibility but has no effect on dropout layer)
-    def gradient(self):
-        return None
-
