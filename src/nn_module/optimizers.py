@@ -8,6 +8,15 @@ from torch import sqrt
 import copy
 torch.set_grad_enabled(False)
 
+# Helper for computing the error rate
+def errors(test_net, input, target):
+    pred = torch.argmax(test_net.forward(input), dim = 1)
+    nbr_errors = 0
+    for i in range(input.size(0)):
+        if pred[i].int() != target[i,1].int(): nbr_errors += 1
+    
+    return nbr_errors/input.size(0)
+
 # OPTIMIZER 1: Stochastic Gradient Descent
 class SGD(object):
 
@@ -18,21 +27,30 @@ class SGD(object):
         self.lossf = lossf
         
     # train for a number of epochs
-    def train(self, train_input, train_target, nb_epochs, stepsize, verbose = False):
+    def train(self, train_input, train_target, nb_epochs, stepsize, verbose = False, test_input = None, test_target=None):
         # get information
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         
         losspath = []
+        losspath_test = []
+        error = []
+        error_test = []
         
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
+            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+            error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(self.lossf.loss(self.model.forward(train_input), train_target))
-            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+                print(losspath[-1])
+            if test_input is not None and test_target is not None:
+                losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
+                error_test.append(errors(self.model, test_input, test_target))
+                if verbose:
+                    print(losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # perform sgd
@@ -58,7 +76,7 @@ class SGD(object):
                         grads[i][0] *= - stepsize   # bias 
                         grads[i][1] *= - stepsize   # weights                
                 self.model.gradient_step(grads)
-        return losspath
+        return losspath, error, losspath_test, error_test
 
 
 # OPTIMIZER 2: batch Stochastic Gradient Descent
@@ -72,21 +90,30 @@ class batchSGD(object):
         self.batchsize = batchsize
         
     # train for a number of epochs
-    def train(self, train_input, train_target, nb_epochs, stepsize, verbose = False):
+    def train(self, train_input, train_target, nb_epochs, stepsize, verbose = False, test_input = None, test_target=None):
         # get information
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         
         losspath = []
+        losspath_test = []
+        error = []
+        error_test = []
         
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
+            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+            error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(self.lossf.loss(self.model.forward(train_input), train_target))
-            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+                print(losspath[-1])
+            if test_input is not None and test_target is not None:
+                losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
+                error_test.append(errors(self.model, test_input, test_target))
+                if verbose:
+                    print(losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # perform batch sgd
@@ -114,7 +141,7 @@ class batchSGD(object):
                         grads[i][0] *= - stepsize/self.batchsize   # bias 
                         grads[i][1] *= - stepsize/self.batchsize   # weights            
                 self.model.gradient_step(grads)
-        return losspath
+        return losspath, error, losspath_test, error_test
 
 
 # OPTIMIZER 3: AdaGrad
@@ -132,21 +159,30 @@ class AdaGrad(object):
         self.delta = delta
         
     # train for a number of epochs
-    def train(self, train_input, train_target, nb_epochs, verbose = False):
+    def train(self, train_input, train_target, nb_epochs, verbose = False, test_input = None, test_target=None):
         # get information
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         # initialize parameters
         losspath = []
+        losspath_test = []
+        error = []
+        error_test = []
         r = None
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
+            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+            error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(self.lossf.loss(self.model.forward(train_input), train_target).item())
-            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+                print(losspath[-1])
+            if test_input is not None and test_target is not None:
+                losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
+                error_test.append(errors(self.model, test_input, test_target))
+                if verbose:
+                    print(losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # iterate over minibatches
@@ -187,7 +223,7 @@ class AdaGrad(object):
                         grads[i][0] = - (self.gamma/(self.delta+sqrt(r[i][0])))*grads[i][0]   # bias 
                         grads[i][1] = - (self.gamma/(self.delta+sqrt(r[i][0])))*grads[i][1]   # weights            
                 self.model.gradient_step(grads)
-        return losspath
+        return losspath, error, losspath_test, error_test
 
 
 # Optimizer 4: RMSProp
@@ -207,21 +243,30 @@ class RMSProp(object):
         self.tau = tau
         
     # train for a number of epochs
-    def train(self, train_input, train_target, nb_epochs, verbose = False):
+    def train(self, train_input, train_target, nb_epochs, verbose = False, test_input = None, test_target=None):
         # get information
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         # initialize parameters
         losspath = []
+        losspath_test = []
+        error = []
+        error_test = []
         r = None
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
+            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+            error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(self.lossf.loss(self.model.forward(train_input), train_target).item())
-            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+                print(losspath[-1])
+            if test_input is not None and test_target is not None:
+                losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
+                error_test.append(errors(self.model, test_input, test_target))
+                if verbose:
+                    print(losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # iterate over mini-batches
@@ -262,7 +307,7 @@ class RMSProp(object):
                         grads[i][0] = - (self.gamma/(self.delta+sqrt(r[i][0])))*grads[i][0]   # bias 
                         grads[i][1] = - (self.gamma/(self.delta+sqrt(r[i][0])))*grads[i][1]   # weights            
                 self.model.gradient_step(grads)
-        return losspath
+        return losspath, error, losspath_test, error_test
 
 
 # OPTIMIZER 5: Adam
@@ -283,13 +328,16 @@ class Adam(object):
         self.beta2 = beta2
         
     # train for a number of epochs
-    def train(self, train_input, train_target, nb_epochs, verbose = False):
+    def train(self, train_input, train_target, nb_epochs, verbose = False, test_input = None, test_target=None):
         # get information
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         # initialize vectors
         losspath = []
+        losspath_test = []
+        error = []
+        error_test = []
         m1 = None
         m1_hat = None
         m2 = None
@@ -298,10 +346,16 @@ class Adam(object):
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
+            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+            error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(self.lossf.loss(self.model.forward(train_input), train_target).item())
-            losspath.append(self.lossf.loss(self.model.forward(train_input), train_target).item())
+                print(losspath[-1])
+            if test_input is not None and test_target is not None:
+                losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
+                error_test.append(errors(self.model, test_input, test_target))
+                if verbose:
+                    print(losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             for k in range(0, n_samples, self.batchsize):
@@ -358,4 +412,4 @@ class Adam(object):
                         grads[i][1] = - self.gamma*m1_hat[i][1]/(self.delta+sqrt(m2_hat[i][1]))  # weights
                 self.model.gradient_step(grads)
 
-        return losspath
+        return losspath, error, losspath_test, error_test
