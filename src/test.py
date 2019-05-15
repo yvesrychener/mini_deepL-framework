@@ -27,7 +27,7 @@ def generate_disc_set(nb):
     target = input.pow(2).sum(1).sub(2 / pi).sign().add(1).div(2).view(nb,1)
     return input, target
 	
-def errors(test_net, train_input, test_input, train_target, test_target):
+def errors(test_net, train_input, test_input, train_target, test_target, lossf = n.loss.MSE()):
     '''
     Display the errors
     parameters:
@@ -87,8 +87,8 @@ if __name__ == '__main__':
     optim = n.optimizers.SGD(test_net_SGD, lossf)
 
     # train the model
-    print('Training Model (SGD & MSE)...')
-    losspath_SGD = optim.train(train_input, train_target, 20, 1e-2)
+    print('\nTraining Model (SGD & MSE)...')
+    _ = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
 
     # display the errors
@@ -113,8 +113,8 @@ if __name__ == '__main__':
     optim = n.optimizers.batchSGD(test_net_batchSGD10, lossf, 10)
 
     # train the model
-    print('Training Model (Batch-SGD & MSE)...')
-    losspath_batchSGD10 = optim.train(train_input, train_target, 20, 1e-2)
+    print('\nTraining Model (Batch-SGD & MSE)...')
+    _ = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
 
     # display the errors
@@ -140,8 +140,8 @@ if __name__ == '__main__':
     optim = n.optimizers.AdaGrad(test_net_ada, lossf, batchsize=10)
 
     # train the model
-    print('Training Model (AdaGrad & MSE)...')
-    losspath_ada = optim.train(train_input, train_target, 20, False)
+    print('\nTraining Model (AdaGrad & MSE)...')
+    _ = optim.train(train_input, train_target, 20, False)
     print('Done')
 
     # display the errors
@@ -167,8 +167,8 @@ if __name__ == '__main__':
     optim = n.optimizers.RMSProp(test_net_rmsp, lossf, batchsize=10)
 
     # train the model
-    print('Training Model (RmsProp & MSE)...')
-    losspath_rmsp = optim.train(train_input, train_target, 20, False)
+    print('\nTraining Model (RmsProp & MSE)...')
+    _ = optim.train(train_input, train_target, 20, False)
     print('Done')
 
     # display the errors
@@ -194,8 +194,8 @@ if __name__ == '__main__':
     optim = n.optimizers.Adam(test_net_adam, lossf, batchsize=10)
 
     # train the model
-    print('Training Model (Adam & MSE)...')
-    losspath_adam = optim.train(train_input, train_target, 20, False)
+    print('\nTraining Model (Adam & MSE)...')
+    _ = optim.train(train_input, train_target, 20, False)
     print('Done')
 
     # display the errors
@@ -221,12 +221,12 @@ if __name__ == '__main__':
     optim = n.optimizers.SGD(test_net_SGD_CE, lossf)
 
     # train the model
-    print('Training Model (SGD & Cross-Entropy)...')
-    losspath_SGD_CE = optim.train(train_input, train_target, 20, 1e-2)
+    print('\nTraining Model (SGD & Cross-Entropy)...')
+    _ = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
 
     # display the errors
-    errors(test_net_SGD_CE, train_input, test_input, train_target, test_target)
+    errors(test_net_SGD_CE, train_input, test_input, train_target, test_target, lossf = n.loss.CE())
     
     # Test with Cross-Entropy loss & Dropout
     # --------------------------------------
@@ -250,15 +250,15 @@ if __name__ == '__main__':
     optim = n.optimizers.SGD(test_net_SGD_CE_DO, lossf)
 
     # train the model
-    print('Training Model (SGD & Cross-Entropy & Dropout)...')
-    losspath_SGD_CE_DO = optim.train(train_input, train_target, 20, 1e-2)
+    print('\nTraining Model (SGD & Cross-Entropy & Dropout)...')
+    _ = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
 
     # Disable training mode
     test_net_SGD_CE_DO.set_training_mode(False)
 
     # display the errors
-    errors(test_net_SGD_CE_DO, train_input, test_input, train_target, test_target)
+    errors(test_net_SGD_CE_DO, train_input, test_input, train_target, test_target, lossf = n.loss.CE())
     
     
     
