@@ -12,6 +12,7 @@ class tanh(module.Module):
     def __init__(self):
         super(tanh, self).__init__()
         self.inputmemory = 0
+    
     # forward pass
     def forward(self, input):
         self.inputmemory = input
@@ -27,6 +28,7 @@ class relu(module.Module):
     def __init__(self):
         super(relu, self).__init__()
         self.inputmemory = 0
+    
     # forward pass
     def forward(self, input):
         self.inputmemory = input

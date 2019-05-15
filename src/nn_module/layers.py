@@ -70,7 +70,7 @@ class dropout(module.Module):
     # forward pass
     def forward(self, input):
         if self.training_mode:
-            # generate Bernoulli for each unit and scale by correct factor
+            # generate Bernoulli variable for each unit and scale by correct factor
             self.d = 1/(1-self.p) * torch.bernoulli(torch.empty_like(input).fill_(1-self.p))
         else:
             # layer inactive
