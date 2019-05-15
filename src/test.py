@@ -5,15 +5,11 @@
 
 # Imports
 import nn_module as n
-import math
+from numpy import pi
 import torch
 from torch import Tensor
 import matplotlib.pyplot as plt
 
-import sys
-if sys.version_info[0] == 3:
-    from importlib import reload
-	
 # Disable Autograd
 torch.set_grad_enabled(False)
 
@@ -28,7 +24,7 @@ def generate_disc_set(nb):
     input, target   : The input data and target label
     '''
     input = Tensor(nb, 2).uniform_(-1, 1)
-    target = input.pow(2).sum(1).sub(2 / math.pi).sign().add(1).div(2).view(nb,1)
+    target = input.pow(2).sum(1).sub(2 / pi).sign().add(1).div(2).view(nb,1)
     return input, target
 	
 def errors(test_net, train_input, test_input, train_target, test_target):
@@ -44,7 +40,7 @@ def errors(test_net, train_input, test_input, train_target, test_target):
     pred_test = torch.argmax(test_net.forward(test_input), dim = 1)
     nbr_errors_train = 0
     nbr_errors_test = 0
-    for i in range(1000):
+    for i in range(train_input.size(0)):
         if pred_train[i].int() != train_target[i,1].int(): nbr_errors_train += 1
         if pred_test[i].int() != test_target[i,1].int(): nbr_errors_test += 1
     print('Final training error: {}%'.format(nbr_errors_train/10))
@@ -59,7 +55,7 @@ def errors(test_net, train_input, test_input, train_target, test_target):
 
 # if this python file is main, run it    
 if __name__ == '__main__':  
-    # generate the datasets (train and test)
+    # generate the datasets (train and test), both of size 1000
     train_input, train_target = generate_disc_set(1000)
     test_input, test_target = generate_disc_set(1000)
 
@@ -98,8 +94,10 @@ if __name__ == '__main__':
     # display the errors
     errors(test_net_SGD, train_input, test_input, train_target, test_target)
     
+
     # Test with Batch-SGD
     # -------------------
+
     # initialise the test network
     test_net_batchSGD10 = n.networks.sequential([
         n.layers.fully_connected(2,25),
@@ -113,16 +111,19 @@ if __name__ == '__main__':
     # define loss and optimizer
     lossf = n.loss.MSE()
     optim = n.optimizers.batchSGD(test_net_batchSGD10, lossf, 10)
+
     # train the model
     print('Training Model (Batch-SGD & MSE)...')
     losspath_batchSGD10 = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
+
     # display the errors
     errors(test_net_batchSGD10, train_input, test_input, train_target, test_target)
     
     
     # Test with AdaGrad
     # -------------------
+
     # initialise the test network
     test_net_ada = n.networks.sequential([
         n.layers.fully_connected(2,25),
@@ -132,19 +133,24 @@ if __name__ == '__main__':
         n.layers.fully_connected(25,25),
         n.activations.relu(),
         n.layers.fully_connected(25,2)
-    ])  
+    ]) 
+
     # define loss and optimizer
     lossf = n.loss.MSE()
     optim = n.optimizers.AdaGrad(test_net_ada, lossf, batchsize=10)
+
     # train the model
     print('Training Model (AdaGrad & MSE)...')
-    losspath_ada = optim.train(train_input, train_target, 20, 1e-2)
+    losspath_ada = optim.train(train_input, train_target, 20, False)
     print('Done')
+
     # display the errors
     errors(test_net_ada, train_input, test_input, train_target, test_target)
     
+
     # Test with RmsProp
     # -----------------
+
     # initialise the test network
     test_net_rmsp = n.networks.sequential([
         n.layers.fully_connected(2,25),
@@ -155,18 +161,23 @@ if __name__ == '__main__':
         n.activations.relu(),
         n.layers.fully_connected(25,2)
     ])  
+
     # define loss and optimizer
     lossf = n.loss.MSE()
     optim = n.optimizers.RMSProp(test_net_rmsp, lossf, batchsize=10)
+
     # train the model
     print('Training Model (RmsProp & MSE)...')
-    losspath_rmsp = optim.train(train_input, train_target, 20, 1e-2)
+    losspath_rmsp = optim.train(train_input, train_target, 20, False)
     print('Done')
+
     # display the errors
     errors(test_net_rmsp, train_input, test_input, train_target, test_target)
     
+
     # Test with Adam
     # --------------
+
     # initialise the test network
     test_net_adam = n.networks.sequential([
         n.layers.fully_connected(2,25),
@@ -176,19 +187,24 @@ if __name__ == '__main__':
         n.layers.fully_connected(25,25),
         n.activations.relu(),
         n.layers.fully_connected(25,2)
-    ])  
+    ]) 
+
     # define loss and optimizer
     lossf = n.loss.MSE()
     optim = n.optimizers.Adam(test_net_adam, lossf, batchsize=10)
+
     # train the model
     print('Training Model (Adam & MSE)...')
-    losspath_adam = optim.train(train_input, train_target, 20, 1e-2)
+    losspath_adam = optim.train(train_input, train_target, 20, False)
     print('Done')
+
     # display the errors
     errors(test_net_adam, train_input, test_input, train_target, test_target)
     
-    # Test with Cross-Entropy loss
-    # ----------------------------
+
+    # Test with Cross-Entropy loss (instead of MSE)
+    # ---------------------------------------------
+
     # initialise the test network
     test_net_SGD_CE = n.networks.sequential([
         n.layers.fully_connected(2,25),
@@ -199,18 +215,22 @@ if __name__ == '__main__':
         n.activations.relu(),
         n.layers.fully_connected(25,2)
     ])  
+
     # define loss and optimizer
-    lossf = n.loss.MSE()
+    lossf = n.loss.CE()
     optim = n.optimizers.SGD(test_net_SGD_CE, lossf)
+
     # train the model
     print('Training Model (SGD & Cross-Entropy)...')
     losspath_SGD_CE = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
+
     # display the errors
     errors(test_net_SGD_CE, train_input, test_input, train_target, test_target)
     
     # Test with Cross-Entropy loss & Dropout
     # --------------------------------------
+
     # initialise the test network
     test_net_SGD_CE_DO = n.networks.sequential([
         n.layers.fully_connected(2,25),
@@ -224,15 +244,19 @@ if __name__ == '__main__':
         n.layers.dropout(0.3),
         n.layers.fully_connected(25,2)
     ])
+
     # define loss and optimizer
     lossf = n.loss.CE()
     optim = n.optimizers.SGD(test_net_SGD_CE_DO, lossf)
+
     # train the model
     print('Training Model (SGD & Cross-Entropy & Dropout)...')
     losspath_SGD_CE_DO = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
+
     # Disable training mode
     test_net_SGD_CE_DO.set_training_mode(False)
+
     # display the errors
     errors(test_net_SGD_CE_DO, train_input, test_input, train_target, test_target)
     

@@ -4,7 +4,7 @@
 # +-----------------------------------------------------------------------+
 
 from . import module
-from math import sqrt
+from numpy import sqrt
 import torch
 torch.set_grad_enabled(False)
 
