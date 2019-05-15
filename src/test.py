@@ -1,6 +1,6 @@
 # +-----------------------------------------------------------------------+
 # | test.py                                                               |
-# | Test the proposed network                                             |
+# | Test the networks                                             |
 # +-----------------------------------------------------------------------+
 
 # Imports
@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 # Disable Autograd
 torch.set_grad_enabled(False)
+
 
 # Function Definitions
 
@@ -64,12 +65,12 @@ if __name__ == '__main__':
     train_input.sub_(mean).div_(std)
     test_input.sub_(mean).div_(std)
 
-    # create class labels (2 dimensional output)
+    # create class labels through one-hot encoding (2 dimensional output)
     train_target = torch.cat((train_target, 1-train_target), dim=1)
     test_target = torch.cat((test_target, 1-test_target), dim=1)
     
-    # Test with SGD
-    # -------------
+    # MODEL 1: Test with SGD
+    # ----------------------
 
     # initialise the test network
     test_net_SGD = n.networks.sequential([
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     optim = n.optimizers.SGD(test_net_SGD, lossf)
 
     # train the model
-    print('\nTraining Model (SGD & MSE)...')
+    print('\nTraining Basic Model (SGD & MSE)...')
     _ = optim.train(train_input, train_target, 20, 1e-2)
     print('Done')
 
@@ -95,8 +96,8 @@ if __name__ == '__main__':
     errors(test_net_SGD, train_input, test_input, train_target, test_target)
     
 
-    # Test with Batch-SGD
-    # -------------------
+    # MODEL 2: Test with Batch-SGD (batchsize 10)
+    # -------------------------------------------
 
     # initialise the test network
     test_net_batchSGD10 = n.networks.sequential([
@@ -108,6 +109,7 @@ if __name__ == '__main__':
         n.activations.relu(),
         n.layers.fully_connected(25,2)
     ])  
+
     # define loss and optimizer
     lossf = n.loss.MSE()
     optim = n.optimizers.batchSGD(test_net_batchSGD10, lossf, 10)
@@ -121,8 +123,8 @@ if __name__ == '__main__':
     errors(test_net_batchSGD10, train_input, test_input, train_target, test_target)
     
     
-    # Test with AdaGrad
-    # -------------------
+    # MODEL 3: Test with AdaGrad
+    # --------------------------
 
     # initialise the test network
     test_net_ada = n.networks.sequential([
@@ -148,8 +150,8 @@ if __name__ == '__main__':
     errors(test_net_ada, train_input, test_input, train_target, test_target)
     
 
-    # Test with RmsProp
-    # -----------------
+    # MODEL 4: Test with RmsProp
+    # --------------------------
 
     # initialise the test network
     test_net_rmsp = n.networks.sequential([
@@ -175,8 +177,8 @@ if __name__ == '__main__':
     errors(test_net_rmsp, train_input, test_input, train_target, test_target)
     
 
-    # Test with Adam
-    # --------------
+    # MODEL 5: Test with Adam
+    # -----------------------
 
     # initialise the test network
     test_net_adam = n.networks.sequential([
@@ -202,8 +204,8 @@ if __name__ == '__main__':
     errors(test_net_adam, train_input, test_input, train_target, test_target)
     
 
-    # Test with Cross-Entropy loss (instead of MSE)
-    # ---------------------------------------------
+    # MODEL 6: Test with Cross-Entropy loss (instead of MSE)
+    # ------------------------------------------------------
 
     # initialise the test network
     test_net_SGD_CE = n.networks.sequential([
@@ -228,8 +230,9 @@ if __name__ == '__main__':
     # display the errors
     errors(test_net_SGD_CE, train_input, test_input, train_target, test_target, lossf = n.loss.CE())
     
-    # Test with Cross-Entropy loss & Dropout
-    # --------------------------------------
+
+    # MODEL 7: Test with Cross-Entropy loss & Dropout
+    # -----------------------------------------------
 
     # initialise the test network
     test_net_SGD_CE_DO = n.networks.sequential([

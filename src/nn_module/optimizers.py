@@ -8,7 +8,7 @@ from torch import sqrt
 import copy
 torch.set_grad_enabled(False)
 
-# Helper for computing the error rate
+# Helper function to compute the error rate
 def errors(test_net, input, target):
     pred = torch.argmax(test_net.forward(input), dim = 1)
     nbr_errors = 0
@@ -33,9 +33,10 @@ class SGD(object):
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         
+        # initialize variables
         losspath = []
-        losspath_test = []
         error = []
+        losspath_test = []
         error_test = []
         
         # iterate over epochs
@@ -45,12 +46,12 @@ class SGD(object):
             error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(losspath[-1])
+                print("Train loss: ", losspath[-1])
             if test_input is not None and test_target is not None:
                 losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
                 error_test.append(errors(self.model, test_input, test_target))
                 if verbose:
-                    print(losspath_test[-1])
+                    print("Test loss: ", losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # perform sgd
@@ -72,6 +73,7 @@ class SGD(object):
                 grads = self.model.gradient()
                 # compute and take the "gradient step" for both the bias and the weights
                 for i,g in enumerate(grads):
+                    # to ignore the activation layers (where g = None)
                     if not g==None:
                         grads[i][0] *= - stepsize   # bias 
                         grads[i][1] *= - stepsize   # weights                
@@ -96,9 +98,10 @@ class batchSGD(object):
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
         
+        # initialize variables
         losspath = []
-        losspath_test = []
         error = []
+        losspath_test = []
         error_test = []
         
         # iterate over epochs
@@ -108,12 +111,12 @@ class batchSGD(object):
             error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(losspath[-1])
+                print("Train loss: ", losspath[-1])
             if test_input is not None and test_target is not None:
                 losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
                 error_test.append(errors(self.model, test_input, test_target))
                 if verbose:
-                    print(losspath_test[-1])
+                    print("Test loss: ", losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # perform batch sgd
@@ -137,6 +140,7 @@ class batchSGD(object):
                 grads = self.model.gradient()
                 # compute and take the "gradient step" for both the bias and the weights
                 for i,g in enumerate(grads):
+                    # to ignore the activation layers (where g = None)
                     if not g==None:
                         grads[i][0] *= - stepsize/self.batchsize   # bias 
                         grads[i][1] *= - stepsize/self.batchsize   # weights            
@@ -164,12 +168,14 @@ class AdaGrad(object):
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
+        
         # initialize parameters
         losspath = []
-        losspath_test = []
         error = []
+        losspath_test = []
         error_test = []
         r = None
+        
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
@@ -177,12 +183,12 @@ class AdaGrad(object):
             error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(losspath[-1])
+                print("Train loss: ", losspath[-1])
             if test_input is not None and test_target is not None:
                 losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
                 error_test.append(errors(self.model, test_input, test_target))
                 if verbose:
-                    print(losspath_test[-1])
+                    print("Test loss: ", losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # iterate over minibatches
@@ -248,12 +254,14 @@ class RMSProp(object):
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
+        
         # initialize parameters
         losspath = []
-        losspath_test = []
         error = []
+        losspath_test = []
         error_test = []
         r = None
+        
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
@@ -261,12 +269,12 @@ class RMSProp(object):
             error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(losspath[-1])
+                print("Train loss: ", losspath[-1])
             if test_input is not None and test_target is not None:
                 losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
                 error_test.append(errors(self.model, test_input, test_target))
                 if verbose:
-                    print(losspath_test[-1])
+                    print("Test loss: ", losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             # iterate over mini-batches
@@ -333,16 +341,18 @@ class Adam(object):
         n_samples = train_input.size(0)
         in_dim = train_input.size(1)
         out_dim = train_target.size(1)
-        # initialize vectors
+        
+        # initialize variables
         losspath = []
-        losspath_test = []
         error = []
+        losspath_test = []
         error_test = []
         m1 = None
         m1_hat = None
         m2 = None
         m2_hat = None
         ctr = 0
+
         # iterate over epochs
         for e in range(nb_epochs):
             # print current epoch loss and store it in losspath
@@ -350,12 +360,12 @@ class Adam(object):
             error.append(errors(self.model, train_input, train_target))
             if verbose:
                 print('Epoch {}...'.format(e))
-                print(losspath[-1])
+                print("Train loss: ", losspath[-1])
             if test_input is not None and test_target is not None:
                 losspath_test.append(self.lossf.loss(self.model.forward(test_input), test_target).item())
                 error_test.append(errors(self.model, test_input, test_target))
                 if verbose:
-                    print(losspath_test[-1])
+                    print("Test loss: ", losspath_test[-1])
             # generate random sample order
             sample_ordering = np.random.permutation([i for i in range(n_samples)])
             for k in range(0, n_samples, self.batchsize):
